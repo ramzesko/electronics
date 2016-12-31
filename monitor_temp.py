@@ -34,29 +34,32 @@ class Scope(object):
         return self.line,
 
 
-def emitter():
+def emitter(channel):
     'return a random value with probability p, else 0'
-
     while True:
- #       ser=serial.Serial('COM4')
-        byte=ser.readline() #popraw na 6 jakby źle działało
+        byte=ser.readline()
         byte1=byte[:5]
         byte2=byte[-7:-2]
         string1=byte1.decode(encoding='UTF-8')
         string2=byte2.decode(encoding='UTF-8')
         print(string1, string2)
-        yield float(string1)
-        yield float(string2)
+        if channel == 1:
+            yield float(string1)
+        elif channel == 2:
+            yield float(string2)
         time.sleep(1)
         if msvcrt.kbhit():
             break
 
 ser=serial.Serial('COM5')
 fig, ax = plt.subplots()
-scope = Scope(ax)
- #pass a generator in "emitter" to produce data for the update func
-ani = animation.FuncAnimation(fig, scope.update, emitter, interval=10,
-                             blit=True)
 
+scope1 = Scope(ax)
+scope2 = Scope(ax)
+ #pass a generator in "emitter" to produce data for the update func
+ani1 = animation.FuncAnimation(fig, scope1.update, emitter(1), interval=1,
+                             blit=True)
+ani2 = animation.FuncAnimation(fig, scope2.update, emitter(2), interval=1,
+                             blit=True)
 plt.grid(True)
 plt.show()
