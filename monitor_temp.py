@@ -6,9 +6,17 @@ import serial
 import time
 import msvcrt
 
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser=ArgumentParser()
+    parser.add_argument('COMport',help='Numer portu COM (domyślnie COM5)', default='COM5')
+    parser.add_argument('maxt',help='Zakres czasowy monitoringu w sekundach np. 2000', type=int, default=2000)
+    parser.add_argument('maxT', help='Górna granica temperatury w stopniach Celsjusza np. 100', type=int, default=100)
+    parser.add_argument('minT', help='Dolna granica temperatury w stopniach Celsjusza np. 20', type=int, default=20)
+    args=parser.parse_args()
 
 class Scope(object):
-    def __init__(self, ax, maxt=200, dt=1):
+    def __init__(self, ax, maxt=args.maxt, dt=1):
         self.ax = ax
         self.dt = dt
         self.maxt = maxt
@@ -16,7 +24,7 @@ class Scope(object):
         self.ydata = [0]
         self.line = Line2D(self.tdata, self.ydata)
         self.ax.add_line(self.line)
-        self.ax.set_ylim(15, 30)
+        self.ax.set_ylim(args.minT, args.maxT)
         self.ax.set_xlim(0, self.maxt)
 
     def update(self, y):
@@ -51,11 +59,10 @@ def emitter(channel):
         if msvcrt.kbhit():
             break
 
-ser=serial.Serial('COM5')
+ser=serial.Serial(args.COMport)
 fig = plt.figure()
 ax1 = fig.add_subplot(211)
 ax2 = fig.add_subplot(212)
-#fig, ax = plt.subplots()
 
 scope1 = Scope(ax1)
 scope2 = Scope(ax2)
